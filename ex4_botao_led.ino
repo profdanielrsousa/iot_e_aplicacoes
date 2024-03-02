@@ -1,7 +1,7 @@
 /* QUARTO PROGRAMA (BOTÃO E LED)
    DANIEL RODRIGUES DE SOUSA 02/03/2024 */
 
-#define LED		8
+#define LED	   8
 #define BOTAO	9
 
 void setup()
