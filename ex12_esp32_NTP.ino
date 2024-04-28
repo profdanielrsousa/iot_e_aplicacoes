@@ -1,4 +1,4 @@
-/* DÉCIMO PRIMEIRO PROGRAMA (ESP32 e NTP Client)
+/* DÉCIMO SEGUNDO PROGRAMA (ESP32 e NTP Client)
    DANIEL RODRIGUES DE SOUSA 28/04/2024 */ 
 
 #include <NTPClient.h>  // inclui biblioteca para trabalhar com NTP (Network Time Protocol)
