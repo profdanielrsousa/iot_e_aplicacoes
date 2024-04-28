@@ -14,7 +14,6 @@ void setup()
 void loop()
 {
   if(digitalRead(BOTAO) == 0) // Verifica se o botão está pressionado (0) ou não (1)
-
   {
     digitalWrite(LED, HIGH);  // Se estiver pressionado, acende o LED
   }
