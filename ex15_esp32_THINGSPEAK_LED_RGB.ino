@@ -31,6 +31,10 @@ int status;
 
 void setup()
 {
+   pinMode(LED_RED, OUTPUT);   // Configuração da direção dos pinos do LED RGB
+   pinMode(LED_GREEN, OUTPUT);
+   pinMode(LED_BLUE, OUTPUT);
+   
   Serial.begin(115200); // Define a taxa de transferência serial (115,2 kbps)
 
   delay(100);
