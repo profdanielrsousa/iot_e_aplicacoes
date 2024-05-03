@@ -1,4 +1,4 @@
-/* DÉCIMO QUINTO PROGRAMA (IoT COM THINKSPEAK, ESP32 E LED RGB)
+/* DÉCIMO QUINTO PROGRAMA (IoT COM THINGSPEAK, ESP32 E LED RGB)
    DANIEL RODRIGUES DE SOUSA 03/05/2024 */ 
 
 #include <WiFi.h>         // Biblioteca para comunicação Wi-Fi
@@ -15,7 +15,7 @@
 #define ssid  "Wokwi-GUEST" // Dados da sua rede Wi-Fi (nome)
 #define senha ""            // Senha da rede Wi-Fi (deixe em branco se não tiver)
 
-                                      // OBS: Altere de acordo com os dados da conta do Thinkspeak
+                                      // OBS: Altere de acordo com os dados da conta do ThingSpeak
 #define myChannelNumber 1234567       // Número do canal no ThingSpeak onde você deseja enviar os dados
 #define myApiKey  "ABCDEFGHIJKLMNOP"  // Chave de API para o seu canal no ThingSpeak
 
