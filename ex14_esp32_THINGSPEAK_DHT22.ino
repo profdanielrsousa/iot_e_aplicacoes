@@ -1,4 +1,4 @@
-/* DÉCIMO QUARTO PROGRAMA (IoT COM THINKSPEAK, ESP32 E SENSOR DHT22)
+/* DÉCIMO QUARTO PROGRAMA (IoT COM THINGSPEAK, ESP32 E SENSOR DHT22)
    DANIEL RODRIGUES DE SOUSA 03/05/2024 */ 
 
 #include <DHT.h>        // Biblioteca do sensor DHT11 (para leitura de temperatura e umidade)
