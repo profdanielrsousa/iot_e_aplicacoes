@@ -12,7 +12,7 @@ DHT dht(DHT_PIN, DHT22);// Cria um objeto para controlar o sensor DHT11. Caso us
 #define ssid  "Wokwi-GUEST" // Dados da sua rede Wi-Fi
 #define senha ""            // Senha da rede Wi-Fi (deixe em branco se não tiver)
 
-                                      // OBS: Altere de acordo com os dados da conta do Thinkspeak
+                                      // OBS: Altere de acordo com os dados da conta do ThingSpeak
 #define myChannelNumber 1234567       // Número do canal no ThingSpeak onde você deseja enviar os dados
 #define myApiKey  "ABCDEFGHIJKLMNOP"  // Chave de API para o seu canal no ThingSpeak
 
