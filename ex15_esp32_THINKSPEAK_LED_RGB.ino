@@ -110,3 +110,4 @@ void loop()
     Serial.println("---");
 
     delay(1000);  // Aguarda por 1 segundo antes de enviar os dados novamente
+}
