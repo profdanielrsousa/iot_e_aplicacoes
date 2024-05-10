@@ -1,7 +1,5 @@
-/* DÉCIMO sexto PROGRAMA (IoT COM ARDUINO IOT, ESP32 E BOTÕES)
+/* DÉCIMO SÉTIMO PROGRAMA (IoT COM ARDUINO IOT, ESP32 E BOTÕES)
    DANIEL RODRIGUES DE SOUSA 10/05/2024 */ 
-
-
 
 /* 
   Sketch gerado pelo Thing "Sem título" do Arduino IoT Cloud 
@@ -20,7 +18,7 @@
   Essas funções são geradas com o Thing e adicionadas ao final desse sketch.
 */
 
-#include "ex16_esp32_ARDUINO_IOT_BOTAO.h"
+#include "ex17_esp32_ARDUINO_IOT_BOTAO.h"
 
 #define BOTAO_1   5  
 #define BOTAO_2   17 
