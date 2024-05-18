@@ -4,6 +4,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
+
 #define SSID        "Wokwi-GUEST"       // Define o nome da rede Wi-Fi
 #define PASS        ""                  // Define a senha da rede Wi-Fi (vazia)
 #define MQTTSERVER  "test.mosquitto.org"// Define o servidor MQTT
