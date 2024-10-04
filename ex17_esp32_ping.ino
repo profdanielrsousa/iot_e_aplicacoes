@@ -1,10 +1,9 @@
-/* DÉCIMO SEXTO PROGRAMA (ESP32 e NTP Client)
-   DANIEL RODRIGUES DE SOUSA 28/04/2024
-   PROJETO: https://wokwi.com/projects/396257110044148737 */
+/* DÉCIMO SÉTIMO PROGRAMA (ESP32 e ping)
+   DANIEL RODRIGUES DE SOUSA 03/10/2024
+   PROJETO: https://wokwi.com/projects/410768457765627905 */
 
-#include <NTPClient.h>  // inclui biblioteca para trabalhar com NTP (Network Time Protocol)
 #include <WiFi.h>       // inclui biblioteca para conexão Wi-Fi
-#include <WiFiUdp.h>    // inclui biblioteca para UDP sobre Wi-Fi
+#include <ESPping.h>    // inclui biblioteca para ping
 #include <LiquidCrystal_I2C.h> // inclui biblioteca para controle de LCD
 
 // define o número de colunas e linhas do LCD
@@ -17,17 +16,13 @@
 const char *ssid = "Wokwi-GUEST"; // nome da rede Wi-Fi
 const char *password = "";        // senha da rede Wi-Fi vazia (não é necessário)
 
-unsigned long int time_ms;  // variável para armazenar o tempo em milissegundos
-
-bool flag_inicializacao = 0;// bandeira para inicialização do sistema
-
-String atual, anterior = "";// strings para armazenar a hora atual e anterior
-
-WiFiUDP ntpUDP; // objeto UDP para conexão com NTP
-NTPClient timeClient(ntpUDP, "a.st1.ntp.br", -10800, 60000);  // cliente de tempo NTP
+bool flag_inicializacao = 0; // bandeira para inicialização do sistema
 
 // define o endereço do LCD (0x27), número de colunas e linhas
 LiquidCrystal_I2C lcd(0x27, COLUNAS, LINHAS);
+
+const char *host = "www.google.com"; // nome do host a ser resolvido
+IPAddress ip; // variável para armazenar o endereço IP
 
 void setup()
 {
@@ -53,7 +48,7 @@ void setup()
       lcd.print("             "); // limpa o LCD antes do início da conexão Wi-Fi
     }
 
-    Serial.print(".");  // imprime um ponto para indicar a progresso da inicialização
+    Serial.print(".");  // imprime um ponto para indicar o progresso da inicialização
     flag_inicializacao = !flag_inicializacao; // alterna a flag de inicialização
   }
 
@@ -65,27 +60,40 @@ void setup()
   lcd.setCursor(0, 0);
   lcd.print("Conectado!");  // impressão da mensagem "Conectado!"
   lcd.setCursor(0, 1);
-  lcd.print("IP: ");
-  lcd.print(WiFi.localIP());// impressão do endereço IP local
+  lcd.print("Loc.:");
+  lcd.print(WiFi.localIP()); // impressão do endereço IP local
 
-  timeClient.begin(); // inicia o cliente de tempo NTP
+  if(WiFi.hostByName(host, ip))
+  {
+    Serial.print("IP do site ");
+    Serial.print(host);
+    Serial.print(" eh: ");
+    Serial.println(ip);
+
+    lcd.setCursor(0, 2);
+    lcd.print("Host:");
+    lcd.print(ip); // impressão do endereço IP do host
+  }
+  else
+  {
+    Serial.println("Falha ao resolver o nome do domínio");
+    while(1); // loop infinito em caso de falha na resolução do domínio
+  }     
 }
 
 void loop()
 {
-  if(millis() - time_ms >= 1000) 
+  if(Ping.ping(host))
   {
-    time_ms = millis();
-    timeClient.update(); // atualiza a hora com base no servidor NTP
-    atual = timeClient.getFormattedTime();// obtém a hora formatada do cliente de tempo NTP
-    digitalWrite(LED, !digitalRead(LED)); // alterna o estado do LED (luz)
-  }
-
-  if(atual != anterior) 
-  {
-    anterior = atual;
-    Serial.println(atual);  // impressão da hora atual no console serial
     lcd.setCursor(0, 3);
-    lcd.print(atual);       // impressão da hora atual na tela LCD
+    lcd.print("Ping: ");
+    lcd.print(Ping.averageTime());
+    lcd.print(" ms"); // impressão do tempo médio de ping
+    Serial.print(Ping.averageTime()); // impressão do tempo médio de ping na serial
+    Serial.println(" ms");
+  }
+  else
+  {
+    Serial.println("Sem resposta do host."); // mensagem de erro se o host não responder ao ping
   }
 }
