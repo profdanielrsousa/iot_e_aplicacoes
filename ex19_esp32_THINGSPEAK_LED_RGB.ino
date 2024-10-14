@@ -1,5 +1,6 @@
 /* DÉCIMO NONO PROGRAMA (IoT COM THINGSPEAK, ESP32 E LED RGB)
-   DANIEL RODRIGUES DE SOUSA 03/05/2024 */ 
+   DANIEL RODRIGUES DE SOUSA 03/05/2024 
+   PROJETO: https://wokwi.com/projects/396871558499573761 */
 
 #include <WiFi.h>         // Biblioteca para comunicação Wi-Fi
 #include <ThingSpeak.h>   // Biblioteca para envio de dados para o ThingSpeak
@@ -12,7 +13,7 @@
 #define LED_GREEN_FIELD 2 // Campo para o status do LED verde no ThingSpeak
 #define LED_BLUE_FIELD  3 // Campo para o status do LED azul no ThingSpeak
 
-#define ssid  "Wokwi-GUEST" // Dados da sua rede Wi-Fi (nome)
+#define ssid  "Wokwi-GUEST" // Nome da rede Wi-Fi
 #define senha ""            // Senha da rede Wi-Fi (deixe em branco se não tiver)
 
                                       // OBS: Altere de acordo com os dados da conta do ThingSpeak
@@ -31,9 +32,9 @@ int status;
 
 void setup()
 {
-   pinMode(LED_RED, OUTPUT);   // Configuração da direção dos pinos do LED RGB
-   pinMode(LED_GREEN, OUTPUT);
-   pinMode(LED_BLUE, OUTPUT);
+  pinMode(LED_RED, OUTPUT);   // Configuração da direção dos pinos do LED RGB
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_BLUE, OUTPUT);
    
   Serial.begin(115200); // Define a taxa de transferência serial (115,2 kbps)
 
@@ -54,11 +55,11 @@ void setup()
   Serial.print("IP: ");
   Serial.println(WiFi.localIP()); // Imprime o endereço de IP do ESP32
 
-  ThingSpeak.begin(client);
+  ThingSpeak.begin(client); // Inicia a comunicação com o ThingSpeak
 
-  digitalWrite(LED_RED, LOW);
-  digitalWrite(LED_GREEN, LOW);
-  digitalWrite(LED_BLUE, LOW);
+  digitalWrite(LED_RED, LOW);   // Inicializa o LED vermelho como desligado
+  digitalWrite(LED_GREEN, LOW); // Inicializa o LED verde como desligado
+  digitalWrite(LED_BLUE, LOW);  // Inicializa o LED azul como desligado
 }
 
 void loop()
@@ -69,38 +70,38 @@ void loop()
 
     if(led_red_status == 1)
     {
-        digitalWrite(LED_RED, HIGH);
-        Serial.println("LED_RED ligado!");    // Imprime "LED vermelho ligado!"
+        digitalWrite(LED_RED, HIGH);      // Liga o LED vermelho
+        Serial.println("LED_RED ligado!");// Imprime "LED vermelho ligado!"
     }
     else if(led_red_status == 0)
     {
-        digitalWrite(LED_RED, LOW);
+        digitalWrite(LED_RED, LOW);           // Desliga o LED vermelho
         Serial.println("LED_RED desligado!"); // Imprime "LED vermelho desligado!"
     }
 
     if(led_green_status == 1)
     {
-        digitalWrite(LED_GREEN, HIGH);
-        Serial.println("LED_GREEN ligado!");    // Imprime "LED verde ligado!"
+        digitalWrite(LED_GREEN, HIGH);      // Liga o LED verde
+        Serial.println("LED_GREEN ligado!");// Imprime "LED verde ligado!"
     }
     else if(led_green_status == 0)
     {
-        digitalWrite(LED_GREEN, LOW);
+        digitalWrite(LED_GREEN, LOW);           // Desliga o LED verde
         Serial.println("LED_GREEN desligado!"); // Imprime "LED verde desligado!"
     }
 
     if(led_blue_status == 1)
     {
-        digitalWrite(LED_BLUE, HIGH);
-        Serial.println("LED_BLUE ligado!");     // Imprime "LED azul ligado!"
+        digitalWrite(LED_BLUE, HIGH);       // Liga o LED azul
+        Serial.println("LED_BLUE ligado!"); // Imprime "LED azul ligado!"
     }
     else if(led_blue_status == 0)
     {
-        digitalWrite(LED_BLUE, LOW);
-        Serial.println("LED_BLUE desligado!");  // Imprime "LED azul desligado!"
+        digitalWrite(LED_BLUE, LOW);          // Desliga o LED azul
+        Serial.println("LED_BLUE desligado!");// Imprime "LED azul desligado!"
     }
 
-    status = ThingSpeak.getLastReadStatus();    // Lê o status da última leitura no ThingSpeak
+    status = ThingSpeak.getLastReadStatus();  // Lê o status da última leitura no ThingSpeak
 
     if(status == 200)
     {
