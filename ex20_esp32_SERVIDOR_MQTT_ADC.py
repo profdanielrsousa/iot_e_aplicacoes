@@ -1,68 +1,123 @@
 # VIGÉSIMO PROGRAMA (IoT COM SERVIDOR MQTT, ESP32 E ADC)
 # DANIEL RODRIGUES DE SOUSA 17/05/2024 
-# PROJETO: https://wokwi.com/projects/397460194908298241 */
-   
+# PROJETO: https://wokwi.com/projects/397460194908298241
+
 import time
 import random
+import logging
+from collections import deque
+
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import paho.mqtt.client as mqtt
 
-# Usa a hora do sistema como seed para a geração de números aleatórios
-random.seed(time.time())
+# ---------------------------------------------------------------------------
+# Configuração de log (substitui prints soltos e bare except)
+# ---------------------------------------------------------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+log = logging.getLogger(__name__)
 
-# Gera um número aleatório entre 1000 e 10000
-numero_aleatorio = random.randint(1000, 10000)
-
+# ---------------------------------------------------------------------------
 # Configurações do broker MQTT
-broker = "test.mosquitto.org"
-port = 1883
-topic = "esp32/adc"
-client_id = 'clientId-' + str(numero_aleatorio)
+# ---------------------------------------------------------------------------
+# Se broker.hivemq.com falhar (gaierror 11004), tente:
+#   "test.mosquitto.org"  ou  "mqtt.eclipseprojects.io"
+# O erro normalmente indica bloqueio de porta 1883 por firewall/antivírus,
+# ou ausência de resolução DNS — verifique sua conexão e as regras de saída.
+BROKER   = "test.mosquitto.org"
+PORT     = 1883
+TOPIC    = "esp32/adc"
+KEEPALIVE = 60
 
-# Lista para armazenar os valores recebidos
-dataList = []
+random.seed(time.time())
+CLIENT_ID = f"clientId-{random.randint(1000, 10000)}"
 
-# Função chamada quando uma nova mensagem é recebida
+# ---------------------------------------------------------------------------
+# Buffer circular: mantém automaticamente no máximo 50 amostras
+# (evita o bug da lista que cresce sem limite e o rebind em animate())
+# ---------------------------------------------------------------------------
+MAX_SAMPLES = 50
+data_buffer: deque[float] = deque(maxlen=MAX_SAMPLES)
+
+# ---------------------------------------------------------------------------
+# Callbacks MQTT — API v2 (sem DeprecationWarning)
+# ---------------------------------------------------------------------------
+def on_connect(client, userdata, flags, reason_code, properties):
+    if reason_code == 0:
+        log.info("Conectado ao broker MQTT. Inscrevendo em '%s'…", TOPIC)
+        client.subscribe(TOPIC)
+    else:
+        log.error("Falha na conexão — código: %s", reason_code)
+
+
 def on_message(client, userdata, message):
     try:
-        # Converte a mensagem recebida para float e adiciona à lista
-        adc_value = float(message.payload.decode('ascii'))
-        dataList.append(adc_value)
-    except:
-        pass
+        value = float(message.payload.decode("ascii"))
+        data_buffer.append(value)
+        log.debug("Valor recebido: %.2f", value)
+    except ValueError as exc:
+        log.warning("Payload inválido ignorado: %s (%s)", message.payload, exc)
 
-# Configura o cliente MQTT
-client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, client_id)
-client.on_message = on_message
 
-# Conecta ao broker MQTT
-client.connect(broker, port, 60)
+def on_disconnect(client, userdata, flags, reason_code, properties):
+    if reason_code != 0:
+        log.warning("Desconexão inesperada — código: %s", reason_code)
 
-# Inscreve-se no tópico para receber mensagens
-client.subscribe(topic)
+# ---------------------------------------------------------------------------
+# Configuração do cliente MQTT (API v2)
+# ---------------------------------------------------------------------------
+client = mqtt.Client(
+    mqtt.CallbackAPIVersion.VERSION2,
+    client_id=CLIENT_ID,
+)
+client.on_connect    = on_connect
+client.on_message    = on_message
+client.on_disconnect = on_disconnect
 
-# Inicia um loop em segundo plano para processar as mensagens recebidas
+try:
+    client.connect(BROKER, PORT, KEEPALIVE)
+except OSError as exc:
+    # gaierror é subclasse de OSError
+    log.error(
+        "Não foi possível conectar ao broker '%s:%s'.\n"
+        "  → Verifique sua conexão, firewall e se a porta %s está liberada.\n"
+        "  → Tente trocar BROKER por 'test.mosquitto.org'.\n"
+        "  Erro original: %s",
+        BROKER, PORT, PORT, exc,
+    )
+    raise SystemExit(1)
+
 client.loop_start()
 
-# Função para animar o gráfico
-def animate(i, dataList):
-    dataList = dataList[-50:]  # Mantém o tamanho da lista fixo
-    ax.clear()                 # Limpa o último quadro de dados
-    ax.plot(dataList)          # Plota o novo quadro de dados
-    ax.set_ylim([0, 4200])     # Define o limite do eixo Y do gráfico
-    ax.set_title("Dados do ESP32 ADC")  # Define o título da figura
-    ax.set_ylabel("Valor ADC")          # Define o título do eixo Y
+# ---------------------------------------------------------------------------
+# Animação Matplotlib
+# ---------------------------------------------------------------------------
+fig, ax = plt.subplots()
 
-# Cria a figura para o gráfico
-fig = plt.figure()
-ax = fig.add_subplot(111)
 
-# Animação do Matplotlib que cuida do gráfico em tempo real
-ani = animation.FuncAnimation(fig, animate, fargs=(dataList,), interval=100)
+def animate(_frame):
+    """Atualiza o gráfico a cada intervalo."""
+    ax.clear()
+    ax.plot(list(data_buffer))        # deque → list para o Matplotlib
+    ax.set_ylim(0, 4200)
+    ax.set_xlim(0, MAX_SAMPLES)
+    ax.set_title("Dados do ESP32 ADC")
+    ax.set_xlabel("Amostras recentes")
+    ax.set_ylabel("Valor ADC")
+    ax.grid(True, linestyle="--", alpha=0.5)
 
-plt.show()  # Mantém o gráfico do Matplotlib persistente na tela até ser fechado
 
-# Quando o gráfico é fechado, para o loop do cliente MQTT e desconecta
+ani = animation.FuncAnimation(fig, animate, interval=100, cache_frame_data=False)
+
+log.info("Gráfico aberto. Feche a janela para encerrar.")
+plt.show()  # bloqueia até a janela ser fechada
+
+# ---------------------------------------------------------------------------
+# Limpeza ao encerrar
+# ---------------------------------------------------------------------------
 client.loop_stop()
 client.disconnect()
+log.info("Cliente MQTT desconectado. Programa encerrado.")
